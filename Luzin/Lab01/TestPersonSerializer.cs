@@ -1,39 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Xunit;
 
-namespace Lab1
+namespace Lab1.Tests
 {
     public class TestPersonSerializer
     {
-        public static void RunTests()
+        private static string UniquePath(string fileName) =>
+            Path.Combine(Path.GetTempPath(), $"Lab1_{Guid.NewGuid():N}_{fileName}");
+
+        [Fact]
+        public void SerializeToJson_And_DeserializeFromJson_RoundTrip_Works()
         {
-            var serializer = new PersonSerializer("test_errors.log");
-
-            Console.WriteLine("=== Testing PersonSerializer ===");
-
-            try
-            {
-                TestSerializeDeserialize(serializer);
-                TestFileOperations(serializer);
-                TestListOperations(serializer);
-                TestErrorHandling(serializer);
-                TestAsyncOperations(serializer).Wait();
-
-                Console.WriteLine("All tests completed successfully!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Test failed: {ex.Message}");
-            }
-        }
-
-        private static void TestSerializeDeserialize(PersonSerializer serializer)
-        {
-            Console.WriteLine("\n1. Testing Serialize/Deserialize:");
+            var errorLog = UniquePath("test_errors.log");
+            var serializer = new PersonSerializer(errorLog);
 
             var person = new Person
             {
@@ -47,103 +30,169 @@ namespace Lab1
             };
 
             string json = serializer.SerializeToJson(person);
-            Console.WriteLine($"Serialized JSON: {json.Substring(0, Math.Min(100, json.Length))}...");
 
-            Person deserialized = serializer.DeserializeFromJson(json);
-            Console.WriteLine($"Deserialized: {deserialized.FirstName} {deserialized.LastName}, Age: {deserialized.Age}");
+            Assert.False(string.IsNullOrWhiteSpace(json));
 
-            if (deserialized.Password != null)
-                Console.WriteLine("ERROR: Password should not be serialized!");
+            var deserialized = serializer.DeserializeFromJson(json);
+            Assert.NotNull(deserialized);
+
+            Assert.Equal("Иван", deserialized.FirstName);
+            Assert.Equal("Иванов", deserialized.LastName);
+            Assert.Equal(25, deserialized.Age);
+            Assert.Equal("ivan@example.com", deserialized.Email);
+            Assert.Equal("+79991234567", deserialized.PhoneNumber);
+            Assert.Equal("123", deserialized.Id);
+
+            Assert.DoesNotContain("Password", json, StringComparison.OrdinalIgnoreCase);
+            Assert.Null(deserialized.Password);
         }
 
-        private static void TestFileOperations(PersonSerializer serializer)
+        [Fact]
+        public void SaveToFile_Then_LoadFromFile_Works()
         {
-            Console.WriteLine("\n2. Testing File Operations:");
+            var errorLog = UniquePath("test_errors.log");
+            var serializer = new PersonSerializer(errorLog);
 
-            var person = new Person
-            {
-                FirstName = "Мария",
-                LastName = "Петрова",
-                Age = 30,
-                Email = "maria@example.com",
-                PhoneNumber = "+79998765432",
-                Id = "456"
-            };
-
-            string filePath = "test_person.json";
-            serializer.SaveToFile(person, filePath);
-            Console.WriteLine($"Saved to file: {filePath}");
-
-            Person loaded = serializer.LoadFromFile(filePath);
-            Console.WriteLine($"Loaded from file: {loaded.FirstName} {loaded.LastName}");
-
-            File.Delete(filePath);
-        }
-
-        private static void TestListOperations(PersonSerializer serializer)
-        {
-            Console.WriteLine("\n3. Testing List Operations:");
-
-            var people = new List<Person>
-        {
-            new Person { FirstName = "Алексей", LastName = "Сидоров", Age = 25, Email = "alex@example.com", Id = "1" },
-            new Person { FirstName = "Ольга", LastName = "Смирнова", Age = 22, Email = "olga@example.com", Id = "2" }
-        };
-
-            string filePath = "test_people.json";
-            serializer.SaveListToFile(people, filePath);
-            Console.WriteLine($"Saved list to file: {filePath}");
-
-            List<Person> loadedList = serializer.LoadListFromFile(filePath);
-            Console.WriteLine($"Loaded {loadedList.Count} people from file");
-
-            File.Delete(filePath);
-        }
-
-        private static void TestErrorHandling(PersonSerializer serializer)
-        {
-            Console.WriteLine("\n4. Testing Error Handling:");
+            string filePath = UniquePath("test_person.json");
 
             try
             {
-                serializer.LoadFromFile("non_existent_file.json");
-            }
-            catch (FileNotFoundException)
-            {
-                Console.WriteLine("Correctly caught FileNotFoundException");
-            }
+                var person = new Person
+                {
+                    FirstName = "Мария",
+                    LastName = "Петрова",
+                    Age = 30,
+                    Email = "maria@example.com",
+                    PhoneNumber = "+79998765432",
+                    Id = "456"
+                };
 
-            try
-            {
-                serializer.DeserializeFromJson("{ invalid json }");
+                serializer.SaveToFile(person, filePath);
+                Assert.True(File.Exists(filePath));
+
+                var loaded = serializer.LoadFromFile(filePath);
+                Assert.NotNull(loaded);
+                Assert.Equal("Мария", loaded.FirstName);
+                Assert.Equal("Петрова", loaded.LastName);
+                Assert.Equal(30, loaded.Age);
+                Assert.Equal("maria@example.com", loaded.Email);
+                Assert.Equal("456", loaded.Id);
             }
-            catch (JsonException)
+            finally
             {
-                Console.WriteLine("Correctly caught JsonException");
+                if (File.Exists(filePath)) File.Delete(filePath);
+                if (File.Exists(errorLog)) File.Delete(errorLog);
             }
         }
 
-        private static async Task TestAsyncOperations(PersonSerializer serializer)
+        [Fact]
+        public void SaveListToFile_Then_LoadListFromFile_Works()
         {
-            Console.WriteLine("\n5. Testing Async Operations:");
+            var errorLog = UniquePath("test_errors.log");
+            var serializer = new PersonSerializer(errorLog);
 
-            var person = new Person
+            string filePath = UniquePath("test_people.json");
+
+            try
             {
-                FirstName = "Дмитрий",
-                LastName = "Кузнецов",
-                Age = 35,
-                Email = "dmitry@example.com",
-                Id = "789"
-            };
+                var people = new List<Person>
+                {
+                    new Person { FirstName = "Алексей", LastName = "Сидоров", Age = 25, Email = "alex@example.com", Id = "1" },
+                    new Person { FirstName = "Ольга", LastName = "Смирнова", Age = 22, Email = "olga@example.com", Id = "2" }
+                };
 
-            string filePath = "test_async.json";
-            await serializer.SaveToFileAsync(person, filePath);
-            Console.WriteLine("Async save completed");
+                serializer.SaveListToFile(people, filePath);
+                Assert.True(File.Exists(filePath));
 
-            Person loaded = await serializer.LoadFromFileAsync(filePath);
-            Console.WriteLine($"Async load completed: {loaded.FirstName} {loaded.LastName}");
+                var loadedList = serializer.LoadListFromFile(filePath);
+                Assert.NotNull(loadedList);
+                Assert.Equal(2, loadedList.Count);
 
-            File.Delete(filePath);
+                Assert.Equal("Алексей", loadedList[0].FirstName);
+                Assert.Equal("Сидоров", loadedList[0].LastName);
+                Assert.Equal("1", loadedList[0].Id);
+
+                Assert.Equal("Ольга", loadedList[1].FirstName);
+                Assert.Equal("Смирнова", loadedList[1].LastName);
+                Assert.Equal("2", loadedList[1].Id);
+            }
+            finally
+            {
+                if (File.Exists(filePath)) File.Delete(filePath);
+                if (File.Exists(errorLog)) File.Delete(errorLog);
+            }
+        }
+
+        [Fact]
+        public void LoadFromFile_NonExistent_Throws_FileNotFoundException()
+        {
+            var errorLog = UniquePath("test_errors.log");
+            var serializer = new PersonSerializer(errorLog);
+
+            string missingPath = UniquePath("does_not_exist.json");
+
+            try
+            {
+                Assert.False(File.Exists(missingPath));
+                Assert.Throws<FileNotFoundException>(() => serializer.LoadFromFile(missingPath));
+            }
+            finally
+            {
+                if (File.Exists(errorLog)) File.Delete(errorLog);
+            }
+        }
+
+        [Fact]
+        public void DeserializeFromJson_InvalidJson_Throws_JsonException()
+        {
+            var errorLog = UniquePath("test_errors.log");
+            var serializer = new PersonSerializer(errorLog);
+
+            try
+            {
+                Assert.Throws<JsonException>(() => serializer.DeserializeFromJson("{ invalid json }"));
+            }
+            finally
+            {
+                if (File.Exists(errorLog)) File.Delete(errorLog);
+            }
+        }
+
+        [Fact]
+        public async Task SaveToFileAsync_Then_LoadFromFileAsync_Works()
+        {
+            var errorLog = UniquePath("test_errors.log");
+            var serializer = new PersonSerializer(errorLog);
+
+            string filePath = UniquePath("test_async.json");
+
+            try
+            {
+                var person = new Person
+                {
+                    FirstName = "Дмитрий",
+                    LastName = "Кузнецов",
+                    Age = 35,
+                    Email = "dmitry@example.com",
+                    Id = "789"
+                };
+
+                await serializer.SaveToFileAsync(person, filePath);
+                Assert.True(File.Exists(filePath));
+
+                var loaded = await serializer.LoadFromFileAsync(filePath);
+                Assert.NotNull(loaded);
+                Assert.Equal("Дмитрий", loaded.FirstName);
+                Assert.Equal("Кузнецов", loaded.LastName);
+                Assert.Equal(35, loaded.Age);
+                Assert.Equal("dmitry@example.com", loaded.Email);
+                Assert.Equal("789", loaded.Id);
+            }
+            finally
+            {
+                if (File.Exists(filePath)) File.Delete(filePath);
+                if (File.Exists(errorLog)) File.Delete(errorLog);
+            }
         }
     }
 }
