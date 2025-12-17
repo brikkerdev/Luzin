@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Lab3
+namespace Lab03
 {
     public class SimpleDictionaryTests
     {
@@ -202,14 +202,14 @@ namespace Lab3
             var array = new KeyValuePair<int, string>[5];
             dict.CopyTo(array, 1);
 
-            Assert.Equal(default(KeyValuePair<int, string>), array[0]);
+            Assert.Equal(default, array[0]);
 
             var copiedItems = array.Skip(1).Take(3).ToList();
             Assert.Contains(new KeyValuePair<int, string>(1, "one"), copiedItems);
             Assert.Contains(new KeyValuePair<int, string>(2, "two"), copiedItems);
             Assert.Contains(new KeyValuePair<int, string>(3, "three"), copiedItems);
 
-            Assert.Equal(default(KeyValuePair<int, string>), array[4]);
+            Assert.Equal(default, array[4]);
         }
 
         [Fact]

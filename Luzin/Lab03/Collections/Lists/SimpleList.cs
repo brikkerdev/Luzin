@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace Lab3
+namespace Lab03
 {
     public class SimpleList : IList, ICollection, IEnumerable
     {

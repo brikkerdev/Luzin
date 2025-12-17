@@ -2,7 +2,7 @@
 using System.Collections;
 using Xunit;
 
-namespace Lab3
+namespace Lab03
 {
     public class SimpleListTests
     {

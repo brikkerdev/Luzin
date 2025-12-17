@@ -53,12 +53,19 @@
 ## Структура проекта
 ```
 Lab3/
-├── SimpleList.cs # Реализация SimpleList
-├── SimpleDictionary.cs # Реализация SimpleDictionary
-├── SimpleDoubleLinkedList.cs # Реализация DoublyLinkedList
-├── SimpleListTests.cs # Тесты для SimpleList
-├── SimpleDictionaryTests.cs # Тесты для SimpleDictionary
-└── SimpleDoubleLinkedListTests.cs # Тесты для SimpleDoubleLinkedList
+Lab3/
+├── Collections/
+│   ├── Lists/
+│   │   ├── SimpleList.cs              # Реализация SimpleList
+│   │   └── SimpleDoubleLinkedList.cs  # Реализация SimpleDoubleLinkedList
+│   └── Dictionaries/
+│       └── SimpleDictionary.cs        # Реализация SimpleDictionary
+└── Tests/
+    ├── Lists/
+    │   ├── SimpleListTests.cs              # Тесты для SimpleList
+    │   └── SimpleDoubleLinkedListTests.cs  # Тесты для SimpleDoubleLinkedList
+    └── Dictionaries/
+        └── SimpleDictionaryTests.cs        # Тесты для SimpleDictionary
 ```
 
 ### Инструкция по запуску

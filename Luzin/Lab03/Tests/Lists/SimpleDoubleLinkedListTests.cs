@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Lab3
+namespace Lab03
 {
     public class SimpleDoubleLinkedListTests
     {

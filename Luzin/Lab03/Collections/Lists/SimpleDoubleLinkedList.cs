@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lab3
+namespace Lab03
 {
     public class SimpleDoubleLinkedList<T> : IList<T>
     {
