@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Lab1
+namespace Luzin.Lab01
 {
     public class Person : IDisposable
     {

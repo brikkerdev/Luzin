@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Lab1
+namespace Luzin.Lab01
 {
     public class PersonSerializer
     {

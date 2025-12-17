@@ -5,9 +5,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Lab1.Tests
+namespace Luzin.Lab01
 {
-    public class TestPersonSerializer
+    public class PersonSerializerTests
     {
         private static string UniquePath(string fileName) =>
             Path.Combine(Path.GetTempPath(), $"Lab1_{Guid.NewGuid():N}_{fileName}");

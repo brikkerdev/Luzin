@@ -2,7 +2,7 @@
 using System.IO;
 
 
-namespace Lab1
+namespace Luzin.Lab01
 {
     public class FileResourceManager : IDisposable
     {
