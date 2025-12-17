@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Lab4
+namespace Lab04
 {
     class Task3
     {
