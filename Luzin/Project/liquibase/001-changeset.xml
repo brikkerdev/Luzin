@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.liquibase.org/xml/ns/dbchangelog
+          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+	<!-- ARTISTS -->
+	<changeSet id="001-create-artists" author="musicweb">
+		<createTable tableName="artists">
+			<column name="id" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+
+			<column name="name" type="varchar(200)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<!-- PostgreSQL identity/auto increment -->
+		<addAutoIncrement tableName="artists"
+                          columnName="id"
+                          columnDataType="int"
+                          generationType="BY DEFAULT"/>
+
+		<createIndex tableName="artists" indexName="ux_artists_name" unique="true">
+			<column name="name"/>
+		</createIndex>
+	</changeSet>
+
+	<!-- SONGS -->
+	<changeSet id="002-create-songs" author="musicweb">
+		<createTable tableName="songs">
+			<column name="id" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+
+			<column name="title" type="varchar(200)">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="text" type="text">
+				<constraints nullable="false"/>
+			</column>
+			
+			<column name="artist_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addAutoIncrement tableName="songs"
+                          columnName="id"
+                          columnDataType="int"
+                          generationType="BY DEFAULT"/>
+
+		<addForeignKeyConstraint
+                baseTableName="songs"
+                baseColumnNames="artist_id"
+                referencedTableName="artists"
+                referencedColumnNames="id"
+                constraintName="fk_songs_artist_id"
+                onDelete="RESTRICT"/>
+
+		<createIndex tableName="songs" indexName="ix_songs_artist_id">
+			<column name="artist_id"/>
+		</createIndex>
+
+		<createIndex tableName="songs" indexName="ix_songs_title">
+			<column name="title"/>
+		</createIndex>
+	</changeSet>
+
+	<!-- USERS -->
+	<changeSet id="003-create-users" author="musicweb">
+		<createTable tableName="users">
+			<column name="id" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+
+			<column name="username" type="varchar(100)">
+				<constraints nullable="false"/>
+			</column>
+
+			<!-- store hashed password (PBKDF2 format string can be > 200, so use text) -->
+			<column name="password_hash" type="text">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addAutoIncrement tableName="users"
+                          columnName="id"
+                          columnDataType="int"
+                          generationType="BY DEFAULT"/>
+
+		<createIndex tableName="users" indexName="ux_users_username" unique="true">
+			<column name="username"/>
+		</createIndex>
+	</changeSet>
+
+	<!-- GENRES -->
+	<changeSet id="004-create-genres" author="musicweb">
+		<createTable tableName="genres">
+			<column name="id" type="int">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+
+			<column name="name" type="varchar(100)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addAutoIncrement tableName="genres"
+						  columnName="id"
+						  columnDataType="int"
+						  generationType="BY DEFAULT"/>
+
+		<createIndex tableName="genres" indexName="ux_genres_name" unique="true">
+			<column name="name"/>
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="005-create-song_genres" author="musicweb">
+		<createTable tableName="song_genres">
+			<column name="song_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="genre_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addPrimaryKey tableName="song_genres"
+					   columnNames="song_id, genre_id"
+					   constraintName="pk_song_genres"/>
+
+		<addForeignKeyConstraint baseTableName="song_genres"
+								 baseColumnNames="song_id"
+								 referencedTableName="songs"
+								 referencedColumnNames="id"
+								 constraintName="fk_song_genres_song"
+								 onDelete="CASCADE"/>
+
+		<addForeignKeyConstraint baseTableName="song_genres"
+								 baseColumnNames="genre_id"
+								 referencedTableName="genres"
+								 referencedColumnNames="id"
+								 constraintName="fk_song_genres_genre"
+								 onDelete="CASCADE"/>
+
+		<createIndex tableName="song_genres" indexName="ix_song_genres_song_id">
+			<column name="song_id"/>
+		</createIndex>
+
+		<createIndex tableName="song_genres" indexName="ix_song_genres_genre_id">
+			<column name="genre_id"/>
+		</createIndex>
+	</changeSet>
+
+</databaseChangeLog>
