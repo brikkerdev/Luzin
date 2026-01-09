@@ -7,4 +7,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="Project\MusicWeb.Tests\MusicWeb.Tests.csproj" />
+    <None Include="Project\MusicWeb\MusicWeb.csproj" />
+    <None Include="Project\MusicWeb\MusicWeb.csproj.user" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Project\MusicWeb\obj\Debug\net8.0\staticwebassets\" />
+    <Folder Include="Project\MusicWeb\obj\Docker\empty\" />
+    <Folder Include="Project\prometheus\" />
+  </ItemGroup>
+
 </Project>

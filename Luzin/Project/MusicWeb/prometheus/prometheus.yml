@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "musicweb"
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "host.docker.internal:5000"  # if your app runs on your host and Prometheus runs in Docker
+          # - "localhost:5000"           # if Prometheus runs on the same host (not in Docker)
+          # - "musicweb:8080"            # if both are in docker-compose and service name is musicweb
